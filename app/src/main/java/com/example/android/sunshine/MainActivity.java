@@ -25,6 +25,7 @@ import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.helper.ItemTouchHelper;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -32,9 +33,13 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ProgressBar;
 
+
+
 import com.example.android.sunshine.data.SunshinePreferences;
 import com.example.android.sunshine.data.WeatherContract;
 import com.example.android.sunshine.sync.SunshineSyncUtils;
+
+import static com.example.android.sunshine.data.WeatherContract.WeatherEntry.CONTENT_URI;
 
 public class MainActivity extends AppCompatActivity implements
         LoaderManager.LoaderCallbacks<Cursor>,
@@ -101,6 +106,7 @@ public class MainActivity extends AppCompatActivity implements
          */
         mLoadingIndicator = (ProgressBar) findViewById(R.id.pb_loading_indicator);
 
+
         /*
          * A LinearLayoutManager is responsible for measuring and positioning item views within a
          * RecyclerView into a linear list. This means that it can produce either a horizontal or
@@ -141,6 +147,31 @@ public class MainActivity extends AppCompatActivity implements
 
         /* Setting the adapter attaches it to the RecyclerView in our layout. */
         mRecyclerView.setAdapter(mForecastAdapter);
+
+        new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0,ItemTouchHelper.LEFT|ItemTouchHelper.RIGHT){
+            @Override
+            public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target) {
+                int fromPosition = viewHolder.getAdapterPosition();
+                int toPosition = target.getAdapterPosition();
+                mForecastAdapter.notifyItemMoved(fromPosition, toPosition);
+                return true;
+            }
+            @Override
+            public void onSwiped(RecyclerView.ViewHolder viewHolder, int swipeDir) {
+
+                int id=(int)viewHolder.itemView.getTag();
+                String stringId=Integer.toString(id);
+                Uri uri =WeatherContract.WeatherEntry.CONTENT_URI;
+                uri=uri.buildUpon().appendPath(stringId).build();
+
+                getContentResolver().delete(uri,null,null);
+                getSupportLoaderManager().restartLoader(ID_FORECAST_LOADER,null,MainActivity.this);
+                mForecastAdapter.notifyItemRemoved(id);
+            }
+        }).attachToRecyclerView(mRecyclerView);
+
+
+
 
 
         showLoading();
@@ -199,7 +230,7 @@ public class MainActivity extends AppCompatActivity implements
 
             case ID_FORECAST_LOADER:
                 /* URI for all rows of weather data in our weather table */
-                Uri forecastQueryUri = WeatherContract.WeatherEntry.CONTENT_URI;
+                Uri forecastQueryUri = CONTENT_URI;
                 /* Sort order: Ascending by date */
                 String sortOrder = WeatherContract.WeatherEntry.COLUMN_DATE + " ASC";
                 /*
@@ -343,4 +374,5 @@ public class MainActivity extends AppCompatActivity implements
 
         return super.onOptionsItemSelected(item);
     }
+
 }
