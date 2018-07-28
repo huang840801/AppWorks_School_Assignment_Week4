@@ -34,7 +34,6 @@ import android.view.View;
 import android.widget.ProgressBar;
 
 
-
 import com.example.android.sunshine.data.SunshinePreferences;
 import com.example.android.sunshine.data.WeatherContract;
 import com.example.android.sunshine.sync.SunshineSyncUtils;
@@ -148,13 +147,29 @@ public class MainActivity extends AppCompatActivity implements
         /* Setting the adapter attaches it to the RecyclerView in our layout. */
         mRecyclerView.setAdapter(mForecastAdapter);
 
+
+
+
+
         new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0,ItemTouchHelper.LEFT|ItemTouchHelper.RIGHT){
+
+
+
             @Override
-            public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target) {
-                int fromPosition = viewHolder.getAdapterPosition();
-                int toPosition = target.getAdapterPosition();
-                mForecastAdapter.notifyItemMoved(fromPosition, toPosition);
-                return true;
+            public int getMovementFlags(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder) {
+                int dragFlags = ItemTouchHelper.UP | ItemTouchHelper.DOWN;
+                int swipeFlags = ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT;
+                int flags = makeMovementFlags(dragFlags, swipeFlags);
+                return flags;
+            }
+
+
+
+            @Override
+            public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder targetViewHolder) {
+                mForecastAdapter.onItemMove(viewHolder.getAdapterPosition(),
+                        targetViewHolder.getAdapterPosition());
+                    return true;
             }
             @Override
             public void onSwiped(RecyclerView.ViewHolder viewHolder, int swipeDir) {
@@ -174,6 +189,10 @@ public class MainActivity extends AppCompatActivity implements
 
 
 
+
+
+
+
         showLoading();
 
         /*
@@ -186,6 +205,7 @@ public class MainActivity extends AppCompatActivity implements
         SunshineSyncUtils.initialize(this);
 
     }
+
 
     /**
      * Uses the URI scheme for showing a location found on a map in conjunction with
