@@ -174,15 +174,13 @@ public class MainActivity extends AppCompatActivity implements
             @Override
             public void onSwiped(RecyclerView.ViewHolder viewHolder, int swipeDir) {
 
-                int id=(int)viewHolder.itemView.getTag();
-                String stringId=Integer.toString(id);
-                Uri uri =WeatherContract.WeatherEntry.CONTENT_URI;
-                uri=uri.buildUpon().appendPath(stringId).build();
+                int position = viewHolder.getAdapterPosition();
+                mForecastAdapter.remove(position);
+                mForecastAdapter.notifyItemRemoved(position);
 
-                getContentResolver().delete(uri,null,null);
-                getSupportLoaderManager().restartLoader(ID_FORECAST_LOADER,null,MainActivity.this);
-                mForecastAdapter.notifyItemRemoved(id);
-            }
+
+                }
+
         }).attachToRecyclerView(mRecyclerView);
 
 

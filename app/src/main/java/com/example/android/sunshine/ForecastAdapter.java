@@ -25,10 +25,10 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+
 import com.example.android.sunshine.utilities.SunshineDateUtils;
 import com.example.android.sunshine.utilities.SunshineWeatherUtils;
 
-import java.util.Collections;
 
 /**
  * {@link ForecastAdapter} exposes a list of weather forecasts
@@ -54,6 +54,10 @@ class ForecastAdapter extends RecyclerView.Adapter<ForecastAdapter.ForecastAdapt
 
         notifyItemMoved(from, to);
     }
+
+    public void remove(int position) {
+    }
+
 
     /**
      * The interface that receives onClick messages.
